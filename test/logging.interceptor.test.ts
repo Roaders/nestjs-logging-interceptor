@@ -34,14 +34,14 @@ describe('Logging interceptor', () => {
 
     it('logs the input and output request details - OK status code', async () => {
         const logSpy: jest.SpyInstance = jest.spyOn(Logger.prototype, 'log');
-        const url: string = `/cats/ok`;
+        const url = `/cats/ok`;
 
         await request(app.getHttpServer()).get(url).expect(HttpStatus.OK);
 
-        const ctx: string = `LoggingInterceptor - GET - ${url}`;
-        const resCtx: string = `LoggingInterceptor - 200 - GET - ${url}`;
-        const incomingMsg: string = `Incoming request - GET - ${url}`;
-        const outgoingMsg: string = `Outgoing response - 200 - GET - ${url}`;
+        const ctx = `LoggingInterceptor - GET - ${url}`;
+        const resCtx = `LoggingInterceptor - 200 - GET - ${url}`;
+        const incomingMsg = `Incoming request - GET - ${url}`;
+        const outgoingMsg = `Outgoing response - 200 - GET - ${url}`;
 
         /**
          * Info level
@@ -69,14 +69,14 @@ describe('Logging interceptor', () => {
         const logSpy: jest.SpyInstance = jest.spyOn(Logger.prototype, 'log');
         const warnSpy: jest.SpyInstance = jest.spyOn(Logger.prototype, 'warn');
         const errorSpy: jest.SpyInstance = jest.spyOn(Logger.prototype, 'error');
-        const url: string = `/cats/badrequest`;
+        const url = `/cats/badrequest`;
 
         await request(app.getHttpServer()).get(url).expect(HttpStatus.BAD_REQUEST);
 
-        const ctx: string = `LoggingInterceptor - GET - ${url}`;
-        const resCtx: string = `LoggingInterceptor - 400 - GET - ${url}`;
-        const incomingMsg: string = `Incoming request - GET - ${url}`;
-        const outgoingMsg: string = `Outgoing response - 400 - GET - ${url}`;
+        const ctx = `LoggingInterceptor - GET - ${url}`;
+        const resCtx = `LoggingInterceptor - 400 - GET - ${url}`;
+        const incomingMsg = `Incoming request - GET - ${url}`;
+        const outgoingMsg = `Outgoing response - 400 - GET - ${url}`;
 
         /**
          * Info level
@@ -111,14 +111,14 @@ describe('Logging interceptor', () => {
         const logSpy: jest.SpyInstance = jest.spyOn(Logger.prototype, 'log');
         const warnSpy: jest.SpyInstance = jest.spyOn(Logger.prototype, 'warn');
         const errorSpy: jest.SpyInstance = jest.spyOn(Logger.prototype, 'error');
-        const url: string = '/cats/internalerror';
+        const url = '/cats/internalerror';
 
         await request(app.getHttpServer()).get(url).expect(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        const ctx: string = `LoggingInterceptor - GET - ${url}`;
-        const resCtx: string = `LoggingInterceptor - 500 - GET - ${url}`;
-        const incomingMsg: string = `Incoming request - GET - ${url}`;
-        const outgoingMsg: string = `Outgoing response - 500 - GET - ${url}`;
+        const ctx = `LoggingInterceptor - GET - ${url}`;
+        const resCtx = `LoggingInterceptor - 500 - GET - ${url}`;
+        const incomingMsg = `Incoming request - GET - ${url}`;
+        const outgoingMsg = `Outgoing response - 500 - GET - ${url}`;
 
         /**
          * Info level
