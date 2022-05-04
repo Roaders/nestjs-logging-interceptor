@@ -1,0 +1,51 @@
+{
+    "name": "@algoan/nestjs-logging-interceptor",
+    "version": "2.1.10",
+    "description": "A simple NestJS interceptor to log input/output requests",
+    "keywords": [
+        "nestjs",
+        "typescript",
+        "nodejs",
+        "algoan"
+    ],
+    "author": "Giles Roadnight",
+    "homepage": "https://github.com/algoan/nestjs-components/tree/master/packages/nestjs-logging-interceptor#readme",
+    "license": "ISC",
+    "main": "dist/src/index.js",
+    "types": "dist/src/index.d.ts",
+    "files": [
+        "dist/src"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/algoan/nestjs-components.git"
+    },
+    "scripts": {
+        "build": "tsc",
+        "pretest": "npm run build",
+        "test": "jest",
+        "test:cov": "jest --coverage"
+    },
+    "bugs": {
+        "url": "https://github.com/algoan/nestjs-components/issues"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "peerDependencies": {
+        "@nestjs/common": ">=5",
+        "@nestjs/core": ">=5",
+        "express": ">=4",
+        "rxjs": ">=6"
+    },
+    "devDependencies": {
+        "@types/jest": "^27.4.0",
+        "@types/supertest": "^2.0.11",
+        "@nestjs/testing": "^8.2.4",
+        "@types/express": "^4.17.13",
+        "typescript": "^4.6.4",
+        "ts-jest": "^27.1.2",
+        "jest": "^27.4.7",
+        "supertest": "^6.1.6"
+    }
+}
