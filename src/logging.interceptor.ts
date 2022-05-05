@@ -6,6 +6,7 @@ import {
     Injectable,
     Logger,
     NestInterceptor,
+    Optional,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
@@ -27,7 +28,7 @@ export const defaultResponseHandler: ResponseHandler = (
     logger: Logger
 ) => {
     const message = `RESPONSE: ${request.method} ${request.url} => ${response.statusCode}`;
-    logger.log(message);
+    logger.log({ message });
 };
 
 export const defaultErrorHandler: ErrorHandler = (request: Request, error: Error, logger: Logger) => {
@@ -67,10 +68,10 @@ export class LoggingInterceptor implements NestInterceptor {
     private readonly logger: Logger;
 
     constructor(
-        private requestHandler: RequestHandler | null = defaultRequestHandler,
-        private responseHandler: ResponseHandler | null = defaultResponseHandler,
-        private errorHandler: ErrorHandler | null = defaultErrorHandler,
-        context = LoggingInterceptor.name
+        @Optional() private requestHandler: RequestHandler | null = defaultRequestHandler,
+        @Optional() private responseHandler: ResponseHandler | null = defaultResponseHandler,
+        @Optional() private errorHandler: ErrorHandler | null = defaultErrorHandler,
+        @Optional() context = LoggingInterceptor.name
     ) {
         this.logger = new Logger(context);
     }

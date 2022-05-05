@@ -38,10 +38,8 @@ describe('Logging interceptor', () => {
 
         await request(app.getHttpServer()).get(url).expect(HttpStatus.OK);
 
-        const ctx = `LoggingInterceptor - GET - ${url}`;
-        const resCtx = `LoggingInterceptor - 200 - GET - ${url}`;
-        const incomingMsg = `Incoming request - GET - ${url}`;
-        const outgoingMsg = `Outgoing response - 200 - GET - ${url}`;
+        const incomingMsg = `REQUEST: GET ${url}`;
+        const outgoingMsg = `RESPONSE: GET ${url} => ${HttpStatus.OK}`;
 
         /**
          * Info level
@@ -49,19 +47,13 @@ describe('Logging interceptor', () => {
         expect(logSpy).toBeCalledTimes(2);
         expect(logSpy.mock.calls[0]).toEqual([
             {
-                body: {},
-                headers: expect.any(Object),
                 message: incomingMsg,
-                method: `GET`,
             },
-            ctx,
         ]);
         expect(logSpy.mock.calls[1]).toEqual([
             {
                 message: outgoingMsg,
-                body: `This action returns all cats`,
             },
-            resCtx,
         ]);
     });
 
@@ -73,10 +65,8 @@ describe('Logging interceptor', () => {
 
         await request(app.getHttpServer()).get(url).expect(HttpStatus.BAD_REQUEST);
 
-        const ctx = `LoggingInterceptor - GET - ${url}`;
-        const resCtx = `LoggingInterceptor - 400 - GET - ${url}`;
-        const incomingMsg = `Incoming request - GET - ${url}`;
-        const outgoingMsg = `Outgoing response - 400 - GET - ${url}`;
+        const incomingMsg = `REQUEST: GET ${url}`;
+        const outgoingMsg = `ERROR: GET ${url} => 400`;
 
         /**
          * Info level
@@ -84,24 +74,16 @@ describe('Logging interceptor', () => {
         expect(logSpy).toBeCalledTimes(1);
         expect(logSpy.mock.calls[0]).toEqual([
             {
-                body: {},
-                headers: expect.any(Object),
                 message: incomingMsg,
-                method: `GET`,
             },
-            ctx,
         ]);
 
         expect(warnSpy).toBeCalledTimes(1);
         expect(warnSpy.mock.calls[0]).toEqual([
             {
                 message: outgoingMsg,
-                method: 'GET',
-                url: '/cats/badrequest',
-                body: {},
                 error: expect.any(BadRequestException),
             },
-            resCtx,
         ]);
 
         expect(errorSpy).not.toHaveBeenCalled();
@@ -115,10 +97,8 @@ describe('Logging interceptor', () => {
 
         await request(app.getHttpServer()).get(url).expect(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        const ctx = `LoggingInterceptor - GET - ${url}`;
-        const resCtx = `LoggingInterceptor - 500 - GET - ${url}`;
-        const incomingMsg = `Incoming request - GET - ${url}`;
-        const outgoingMsg = `Outgoing response - 500 - GET - ${url}`;
+        const incomingMsg = `REQUEST: GET ${url}`;
+        const outgoingMsg = `ERROR: GET ${url} => ${HttpStatus.INTERNAL_SERVER_ERROR}`;
 
         /**
          * Info level
@@ -126,25 +106,17 @@ describe('Logging interceptor', () => {
         expect(logSpy).toBeCalledTimes(1);
         expect(logSpy.mock.calls[0]).toEqual([
             {
-                body: {},
-                headers: expect.any(Object),
                 message: incomingMsg,
-                method: `GET`,
             },
-            ctx,
         ]);
 
         expect(errorSpy).toBeCalledTimes(1);
         expect(errorSpy.mock.calls[0]).toEqual([
             {
                 message: outgoingMsg,
-                method: 'GET',
-                url: '/cats/internalerror',
-                body: {},
                 error: expect.any(InternalServerErrorException),
             },
             expect.any(String),
-            resCtx,
         ]);
 
         expect(warnSpy).not.toHaveBeenCalled();
