@@ -11,45 +11,82 @@ import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
+export type RequestHandler = (request: Request, logger: Logger) => void;
+export type ResponseHandler = (request: Request, response: Response, body: unknown, logger: Logger) => void;
+export type ErrorHandler = (request: Request, error: Error, logger: Logger) => void;
+
+export const defaultRequestHandler: RequestHandler = (request: Request, logger: Logger) => {
+    const message = `REQUEST: ${request.method} ${request.url}`;
+    logger.log({ message });
+};
+
+export const defaultResponseHandler: ResponseHandler = (
+    request: Request,
+    response: Response,
+    _body: unknown,
+    logger: Logger
+) => {
+    const message = `RESPONSE: ${request.method} ${request.url} => ${response.statusCode}`;
+    logger.log(message);
+};
+
+export const defaultErrorHandler: ErrorHandler = (request: Request, error: Error, logger: Logger) => {
+    if (error instanceof HttpException) {
+        const statusCode: number = error.getStatus();
+        const message = `ERROR: ${request.method} ${request.url} => ${statusCode}`;
+
+        if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
+            logger.error(
+                {
+                    message,
+                    error,
+                },
+                error.stack
+            );
+        } else {
+            logger.warn({
+                message,
+                error,
+            });
+        }
+    } else {
+        logger.error(
+            {
+                message: `ERROR: ${request.method} ${request.url}`,
+            },
+            error.stack
+        );
+    }
+};
+
 /**
  * Interceptor that logs input/output requests
  */
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-    private readonly ctxPrefix: string = LoggingInterceptor.name;
-    private readonly logger: Logger = new Logger(this.ctxPrefix);
-    private userPrefix = '';
+    private readonly logger: Logger;
 
-    /**
-     * User prefix setter
-     * ex. [MyPrefix - LoggingInterceptor - 200 - GET - /]
-     */
-    public setUserPrefix(prefix: string): void {
-        this.userPrefix = `${prefix} - `;
+    constructor(
+        private requestHandler: RequestHandler | null = defaultRequestHandler,
+        private responseHandler: ResponseHandler | null = defaultResponseHandler,
+        private errorHandler: ErrorHandler | null = defaultErrorHandler,
+        context = LoggingInterceptor.name
+    ) {
+        this.logger = new Logger(context);
     }
 
     /**
      * Intercept method, logs before and after the request being processed
      * @param context details about the current request
-     * @param call$ implements the handle method that returns an Observable
+     * @param callHandler implements the handle method that returns an Observable
      */
-    public intercept(context: ExecutionContext, call$: CallHandler): Observable<unknown> {
-        const req: Request = context.switchToHttp().getRequest();
-        const { method, url, body, headers } = req;
-        const ctx = `${this.userPrefix}${this.ctxPrefix} - ${method} - ${url}`;
-        const message = `Incoming request - ${method} - ${url}`;
+    public intercept(context: ExecutionContext, callHandler: CallHandler): Observable<unknown> {
+        if (this.requestHandler != null) {
+            const request = context.switchToHttp().getRequest();
+            this.requestHandler(request, this.logger);
+        }
 
-        this.logger.log(
-            {
-                message,
-                method,
-                body,
-                headers,
-            },
-            ctx
-        );
-
-        return call$.handle().pipe(
+        return callHandler.handle().pipe(
             tap({
                 next: (val: unknown): void => {
                     this.logNext(val, context);
@@ -67,20 +104,12 @@ export class LoggingInterceptor implements NestInterceptor {
      * @param context details about the current request
      */
     private logNext(body: unknown, context: ExecutionContext): void {
-        const req: Request = context.switchToHttp().getRequest<Request>();
-        const res: Response = context.switchToHttp().getResponse<Response>();
-        const { method, url } = req;
-        const { statusCode } = res;
-        const ctx = `${this.userPrefix}${this.ctxPrefix} - ${statusCode} - ${method} - ${url}`;
-        const message = `Outgoing response - ${statusCode} - ${method} - ${url}`;
+        if (this.responseHandler != null) {
+            const request = context.switchToHttp().getRequest<Request>();
+            const response = context.switchToHttp().getResponse<Response>();
 
-        this.logger.log(
-            {
-                message,
-                body,
-            },
-            ctx
-        );
+            this.responseHandler(request, response, body, this.logger);
+        }
     }
 
     /**
@@ -89,46 +118,10 @@ export class LoggingInterceptor implements NestInterceptor {
      * @param context details about the current request
      */
     private logError(error: Error, context: ExecutionContext): void {
-        const req: Request = context.switchToHttp().getRequest<Request>();
-        const { method, url, body } = req;
+        const request = context.switchToHttp().getRequest<Request>();
 
-        if (error instanceof HttpException) {
-            const statusCode: number = error.getStatus();
-            const ctx = `${this.userPrefix}${this.ctxPrefix} - ${statusCode} - ${method} - ${url}`;
-            const message = `Outgoing response - ${statusCode} - ${method} - ${url}`;
-
-            if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
-                this.logger.error(
-                    {
-                        method,
-                        url,
-                        body,
-                        message,
-                        error,
-                    },
-                    error.stack,
-                    ctx
-                );
-            } else {
-                this.logger.warn(
-                    {
-                        method,
-                        url,
-                        error,
-                        body,
-                        message,
-                    },
-                    ctx
-                );
-            }
-        } else {
-            this.logger.error(
-                {
-                    message: `Outgoing response - ${method} - ${url}`,
-                },
-                error.stack,
-                `${this.userPrefix}${this.ctxPrefix} - ${method} - ${url}`
-            );
+        if (this.errorHandler != null) {
+            this.errorHandler(request, error, this.logger);
         }
     }
 }

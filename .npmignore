@@ -1,0 +1,4 @@
+/node_modules
+*.tgz
+.eslint.js
+.jestconfig.js
