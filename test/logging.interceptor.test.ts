@@ -6,7 +6,7 @@ import {
     Logger,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { CatsModule } from './test-app/cats/cats.module';
 import { CoreModule } from './test-app/core/core.module';
 
