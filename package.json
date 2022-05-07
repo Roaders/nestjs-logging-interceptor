@@ -22,9 +22,7 @@
         "lint": "eslint . --ext .ts,.d.ts,.js",
         "lint:fix": "eslint . --ext .ts,.d.ts,.js --fix",
         "prebuild-release": "npm run clean",
-        "build-release": "concurrently --kill-others-on-fail npm:test npm:lint npm:build",
-        "prepublishOnly": "npm run build-release",
-        "prepack": "npm run build-release"
+        "build-release": "concurrently --kill-others-on-fail npm:test npm:lint npm:build"
     },
     "publishConfig": {
         "access": "public"
