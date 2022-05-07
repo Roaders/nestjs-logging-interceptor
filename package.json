@@ -1,6 +1,6 @@
 {
     "name": "nestjs-logging-interceptor",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "description": "A simple NestJS interceptor to log input/output requests",
     "keywords": [
         "nestjs",
