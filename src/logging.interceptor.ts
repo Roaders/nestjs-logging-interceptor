@@ -60,6 +60,13 @@ export const defaultErrorHandler: ErrorHandler = (request: Request, error: Error
     }
 };
 
+export type LoggingInterceptorConfig = {
+    requestHandler: RequestHandler | null;
+    responseHandler: ResponseHandler | null;
+    errorHandler: ErrorHandler | null;
+    context: string;
+};
+
 /**
  * Interceptor that logs input/output requests
  */
@@ -67,13 +74,23 @@ export const defaultErrorHandler: ErrorHandler = (request: Request, error: Error
 export class LoggingInterceptor implements NestInterceptor {
     private readonly logger: Logger;
 
-    constructor(
-        @Optional() private requestHandler: RequestHandler | null = defaultRequestHandler,
-        @Optional() private responseHandler: ResponseHandler | null = defaultResponseHandler,
-        @Optional() private errorHandler: ErrorHandler | null = defaultErrorHandler,
-        @Optional() context = LoggingInterceptor.name
-    ) {
-        this.logger = new Logger(context);
+    private readonly config: LoggingInterceptorConfig;
+
+    constructor(@Optional() config?: Partial<LoggingInterceptorConfig> | string) {
+        const partialConfig: Partial<LoggingInterceptorConfig> =
+            typeof config === 'string' ? { context: config } : { ...config };
+
+        this.config = {
+            ...partialConfig,
+            requestHandler:
+                partialConfig.requestHandler !== undefined ? partialConfig.requestHandler : defaultRequestHandler,
+            responseHandler:
+                partialConfig.responseHandler !== undefined ? partialConfig.responseHandler : defaultResponseHandler,
+            errorHandler: partialConfig.errorHandler !== undefined ? partialConfig.errorHandler : defaultErrorHandler,
+            context: partialConfig.context || LoggingInterceptor.name,
+        };
+
+        this.logger = new Logger(this.config.context);
     }
 
     /**
@@ -82,9 +99,9 @@ export class LoggingInterceptor implements NestInterceptor {
      * @param callHandler implements the handle method that returns an Observable
      */
     public intercept(context: ExecutionContext, callHandler: CallHandler): Observable<unknown> {
-        if (this.requestHandler != null) {
+        if (this.config.requestHandler != null) {
             const request = context.switchToHttp().getRequest();
-            this.requestHandler(request, this.logger);
+            this.config.requestHandler(request, this.logger);
         }
 
         return callHandler.handle().pipe(
@@ -105,11 +122,11 @@ export class LoggingInterceptor implements NestInterceptor {
      * @param context details about the current request
      */
     private logNext(body: unknown, context: ExecutionContext): void {
-        if (this.responseHandler != null) {
+        if (this.config.responseHandler != null) {
             const request = context.switchToHttp().getRequest<Request>();
             const response = context.switchToHttp().getResponse<Response>();
 
-            this.responseHandler(request, response, body, this.logger);
+            this.config.responseHandler(request, response, body, this.logger);
         }
     }
 
@@ -121,8 +138,8 @@ export class LoggingInterceptor implements NestInterceptor {
     private logError(error: Error, context: ExecutionContext): void {
         const request = context.switchToHttp().getRequest<Request>();
 
-        if (this.errorHandler != null) {
-            this.errorHandler(request, error, this.logger);
+        if (this.config.errorHandler != null) {
+            this.config.errorHandler(request, error, this.logger);
         }
     }
 }
