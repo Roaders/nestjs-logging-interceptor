@@ -1,4 +1,8 @@
 /node_modules
 *.tgz
-.eslint.js
-.jestconfig.js
+.eslintrc.js
+jest.config.js
+/tsconfig.json
+/examples
+/src
+/test

@@ -11,8 +11,8 @@
     ],
     "author": "Giles Roadnight",
     "license": "ISC",
-    "main": "dist/src/index.js",
-    "types": "dist/src/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
         "clean": "rimraf dist",
         "build": "tsc",
