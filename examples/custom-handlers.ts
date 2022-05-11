@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from 'nestjs-logging-interceptor';
 
+// ts-command-line-args_write-markdown_copyCodeBelow
 @Module({
     providers: [
         {
